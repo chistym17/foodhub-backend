@@ -29,7 +29,8 @@ const generateToken = (user) => {
       id: user.id, 
       email: user.email, 
       role: user.role,
-      name: user.name
+      name: user.name,
+      country: user.country
     },
     process.env.JWT_SECRET,
     { expiresIn: '7d' }
@@ -37,7 +38,6 @@ const generateToken = (user) => {
 };
 
 router.post('/signup', async (req, res) => {
-  console.log('📝 Signup request received:', { body: { ...req.body, password: '[REDACTED]' } });
   
   try {
     const data = userSchema.parse(req.body);
