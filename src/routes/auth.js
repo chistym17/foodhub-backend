@@ -28,7 +28,8 @@ const generateToken = (user) => {
     { 
       id: user.id, 
       email: user.email, 
-      role: user.role 
+      role: user.role,
+      name: user.name
     },
     process.env.JWT_SECRET,
     { expiresIn: '7d' }
@@ -36,8 +37,11 @@ const generateToken = (user) => {
 };
 
 router.post('/signup', async (req, res) => {
+  console.log('📝 Signup request received:', { body: { ...req.body, password: '[REDACTED]' } });
+  
   try {
     const data = userSchema.parse(req.body);
+
     const hashedPassword = await bcrypt.hash(data.password, 10);
 
     const user = await prisma.user.create({
@@ -57,17 +61,30 @@ router.post('/signup', async (req, res) => {
     });
 
     const token = generateToken(user);
+
     res.cookie('token', token, getCookieOptions());
 
     res.status(201).json({ user });
   } catch (error) {
+    console.error('Error in signup process:', {
+      name: error.name,
+      message: error.message,
+      stack: error.stack
+    });
+
     if (error instanceof z.ZodError) {
+      console.log('📋 Validation error details:', error.errors);
       return res.status(400).json({ message: error.errors[0].message });
     }
     if (error.code === 'P2002') {
+      console.log('📧 Duplicate email error');
       return res.status(400).json({ message: 'Email already exists' });
     }
-    res.status(500).json({ message: 'Internal server error' });
+    console.error('🔥 Unexpected error:', error);
+    res.status(500).json({ 
+      message: 'Internal server error',
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
   }
 });
 
