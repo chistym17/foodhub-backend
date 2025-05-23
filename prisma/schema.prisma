@@ -1,0 +1,97 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  name      String
+  email     String   @unique
+  password  String
+  role      Role
+  country   Country
+  orders    Order[]
+  payments  PaymentMethod[]
+}
+
+model Restaurant {
+  id         Int      @id @default(autoincrement())
+  name       String
+  country    Country
+  menuItems  MenuItem[]
+}
+
+model MenuItem {
+  id           Int      @id @default(autoincrement())
+  name         String
+  description  String?
+  price        Float
+  restaurantId Int
+
+  restaurant   Restaurant @relation(fields: [restaurantId], references: [id])
+  orderItems   OrderItem[]
+}
+
+model Order {
+  id        Int        @id @default(autoincrement())
+  userId    Int
+  status    OrderStatus @default(PENDING)
+  createdAt DateTime   @default(now())
+
+  user      User       @relation(fields: [userId], references: [id])
+  items     OrderItem[]
+  payment   Payment?
+}
+
+model OrderItem {
+  id         Int      @id @default(autoincrement())
+  orderId    Int
+  menuItemId Int
+  quantity   Int
+
+  order      Order    @relation(fields: [orderId], references: [id])
+  menuItem   MenuItem @relation(fields: [menuItemId], references: [id])
+}
+
+model PaymentMethod {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  type      String   // e.g. "credit_card", "paypal"
+  details   String   // token or JSON string
+  createdAt DateTime @default(now())
+
+  user      User     @relation(fields: [userId], references: [id])
+  payments  Payment[]
+}
+
+model Payment {
+  id              Int      @id @default(autoincrement())
+  orderId         Int      @unique
+  paymentMethodId Int
+  amount          Float
+  paidAt          DateTime @default(now())
+
+  paymentMethod   PaymentMethod @relation(fields: [paymentMethodId], references: [id])
+  order           Order         @relation(fields: [orderId], references: [id])
+}
+
+enum Role {
+  ADMIN
+  MANAGER
+  MEMBER
+}
+
+enum Country {
+  INDIA
+  AMERICA
+}
+
+enum OrderStatus {
+  PENDING
+  COMPLETED
+  CANCELLED
+}
