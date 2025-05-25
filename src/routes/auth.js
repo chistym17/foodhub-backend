@@ -37,6 +37,26 @@ const generateToken = (user) => {
   );
 };
 
+// Middleware to check if user is admin
+const isAdmin = async (req, res, next) => {
+  try {
+    const token = req.cookies.token;
+    if (!token) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    if (decoded.role !== 'ADMIN') {
+      return res.status(403).json({ error: 'Forbidden: Only administrators can access this resource' });
+    }
+
+    req.user = decoded;
+    next();
+  } catch (error) {
+    return res.status(401).json({ error: 'Invalid token' });
+  }
+};
+
 router.post('/signup', async (req, res) => {
   
   try {
@@ -134,6 +154,32 @@ router.post('/signout', (req, res) => {
     path: '/'
   });
   res.json({ message: 'Signed out successfully' });
+});
+
+// Get all users (admin only)
+router.get('/users', isAdmin, async (req, res) => {
+  try {
+    const users = await prisma.user.findMany({
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        role: true,
+        country: true,
+        _count: {
+          select: {
+            orders: true,
+            payments: true
+          }
+        }
+      },
+    });
+
+    res.json(users);
+  } catch (error) {
+    console.error('Error fetching users:', error);
+    res.status(500).json({ error: 'Failed to fetch users' });
+  }
 });
 
 module.exports = router; 
