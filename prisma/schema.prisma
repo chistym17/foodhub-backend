@@ -41,6 +41,7 @@ model Order {
   userId    Int
   status    OrderStatus @default(PENDING)
   createdAt DateTime   @default(now())
+  totalAmount Float
 
   user      User       @relation(fields: [userId], references: [id])
   items     OrderItem[]
