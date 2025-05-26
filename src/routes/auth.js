@@ -15,13 +15,18 @@ const userSchema = z.object({
   country: z.enum(['INDIA', 'AMERICA']).optional()
 });
 
-const getCookieOptions = () => ({
-  httpOnly: true,
-  secure: process.env.NODE_ENV === 'production',
-  sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
-  path: '/',
-  maxAge: 7 * 24 * 60 * 60 * 1000 
-});
+const getCookieOptions = () => {
+  const isProduction = process.env.NODE_ENV === 'production';
+  
+  return {
+    httpOnly: true,
+    secure: true, 
+    sameSite: isProduction ? 'none' : 'lax',
+    path: '/',
+    maxAge: 7 * 24 * 60 * 60 * 1000, 
+    domain: isProduction ? process.env.COOKIE_DOMAIN : undefined, 
+  };
+};
 
 const generateToken = (user) => {
   return jwt.sign(
