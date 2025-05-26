@@ -18,13 +18,15 @@ const userSchema = z.object({
 const getCookieOptions = () => {
   const isProduction = process.env.NODE_ENV === 'production';
   
-  return {
+  const options = {
     httpOnly: true,
     secure: true, 
     sameSite: isProduction ? 'none' : 'lax',
     path: '/',
-    maxAge: 1 * 24 * 60 * 60 * 1000, 
+    maxAge: 7 * 24 * 60 * 60 * 1000, 
   };
+
+  return options;
 };
 
 const generateToken = (user) => {
@@ -151,13 +153,23 @@ router.post('/signin', async (req, res) => {
 });
 
 router.post('/signout', (req, res) => {
-  res.clearCookie('token', {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
-    path: '/'
-  });
+  // Use the same cookie options for consistency
+  res.clearCookie('token', getCookieOptions());
   res.json({ message: 'Signed out successfully' });
+});
+
+// Add a test route to check cookie settings
+router.get('/cookie-test', (req, res) => {
+  const cookieOptions = getCookieOptions();
+  console.log('Cookie options:', cookieOptions); // For debugging
+  
+  res.cookie('test_cookie', 'test_value', cookieOptions);
+  res.json({ 
+    message: 'Test cookie set',
+    cookieOptions,
+    environment: process.env.NODE_ENV,
+    cookieDomain: process.env.COOKIE_DOMAIN
+  });
 });
 
 // Get all users (admin only)
