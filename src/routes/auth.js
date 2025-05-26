@@ -23,8 +23,7 @@ const getCookieOptions = () => {
     secure: true, 
     sameSite: isProduction ? 'none' : 'lax',
     path: '/',
-    maxAge: 7 * 24 * 60 * 60 * 1000, 
-    domain: isProduction ? process.env.COOKIE_DOMAIN : undefined, 
+    maxAge: 1 * 24 * 60 * 60 * 1000, 
   };
 };
 
