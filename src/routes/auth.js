@@ -17,13 +17,13 @@ const userSchema = z.object({
 
 const getCookieOptions = () => {
   const isProduction = process.env.NODE_ENV === 'production';
-  
+
   const options = {
     httpOnly: true,
-    secure: true, 
+    secure: true,
     sameSite: isProduction ? 'none' : 'lax',
     path: '/',
-    maxAge: 7 * 24 * 60 * 60 * 1000, 
+    maxAge: 7 * 24 * 60 * 60 * 1000,
   };
 
   return options;
@@ -31,9 +31,9 @@ const getCookieOptions = () => {
 
 const generateToken = (user) => {
   return jwt.sign(
-    { 
-      id: user.id, 
-      email: user.email, 
+    {
+      id: user.id,
+      email: user.email,
       role: user.role,
       name: user.name,
       country: user.country
@@ -64,7 +64,7 @@ const isAdmin = async (req, res, next) => {
 };
 
 router.post('/signup', async (req, res) => {
-  
+
   try {
     const data = userSchema.parse(req.body);
 
@@ -88,6 +88,8 @@ router.post('/signup', async (req, res) => {
 
     const token = generateToken(user);
 
+    console.log("token is-", token)
+
     res.cookie('token', token, getCookieOptions());
 
     res.status(201).json({ user });
@@ -107,7 +109,7 @@ router.post('/signup', async (req, res) => {
       return res.status(400).json({ message: 'Email already exists' });
     }
     console.error('🔥 Unexpected error:', error);
-    res.status(500).json({ 
+    res.status(500).json({
       message: 'Internal server error',
       error: process.env.NODE_ENV === 'development' ? error.message : undefined
     });
@@ -162,9 +164,9 @@ router.post('/signout', (req, res) => {
 router.get('/cookie-test', (req, res) => {
   const cookieOptions = getCookieOptions();
   console.log('Cookie options:', cookieOptions); // For debugging
-  
+
   res.cookie('test_cookie', 'test_value', cookieOptions);
-  res.json({ 
+  res.json({
     message: 'Test cookie set',
     cookieOptions,
     environment: process.env.NODE_ENV,
