@@ -90,6 +90,8 @@ router.post('/signup', async (req, res) => {
 
     console.log("token is-", token)
 
+    console.log(getCookieOptions())
+
     res.cookie('token', token, getCookieOptions());
 
     res.status(201).json({ user });
@@ -143,7 +145,12 @@ router.post('/signin', async (req, res) => {
 
     const { password: _, ...userWithoutPassword } = user;
     const token = generateToken(userWithoutPassword);
+    console.log("token is-", token)
+
     res.cookie('token', token, getCookieOptions());
+
+    console.log('Set-Cookie header:', res.getHeaders()['set-cookie']);
+
 
     res.json({ user: userWithoutPassword });
   } catch (error) {
