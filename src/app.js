@@ -14,7 +14,7 @@ app.use(express.json());
 app.use(cookieParser());
 
 app.use(cors({
-  origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+  origin: "https://foodhub-fawn.vercel.app",
   credentials: true,
   allowedHeaders: ['Content-Type', 'Authorization', 'Cookie'],
   exposedHeaders: ['Set-Cookie']
@@ -22,7 +22,7 @@ app.use(cors({
 
 app.use((req, res, next) => {
   const token = req.cookies.token;
-  
+
   if (token) {
     try {
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
@@ -31,7 +31,7 @@ app.use((req, res, next) => {
       console.error('Token verification failed:', error);
     }
   }
-  
+
   next();
 });
 
