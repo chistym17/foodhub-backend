@@ -162,26 +162,11 @@ router.post('/signin', async (req, res) => {
 });
 
 router.post('/signout', (req, res) => {
-  // Use the same cookie options for consistency
   res.clearCookie('token', getCookieOptions());
   res.json({ message: 'Signed out successfully' });
 });
 
-// Add a test route to check cookie settings
-router.get('/cookie-test', (req, res) => {
-  const cookieOptions = getCookieOptions();
-  console.log('Cookie options:', cookieOptions); // For debugging
 
-  res.cookie('test_cookie', 'test_value', cookieOptions);
-  res.json({
-    message: 'Test cookie set',
-    cookieOptions,
-    environment: process.env.NODE_ENV,
-    cookieDomain: process.env.COOKIE_DOMAIN
-  });
-});
-
-// Get all users (admin only)
 router.get('/users', isAdmin, async (req, res) => {
   try {
     const users = await prisma.user.findMany({
